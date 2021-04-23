@@ -1,10 +1,18 @@
 /**
+ * Copyright (c) 1998-2020 Oracle NetSuite, Inc.
+ * 2955 Campus Drive, Suite 100, San Mateo, CA, USA 94403-2511
+ * All Rights Reserved.
+ *
+ * This software is the confidential and proprietary information of NetSuite, Inc. ("Confidential Information").
+ * You shall not disclose such Confidential Information and shall use it only in accordance with the terms of the license agreement
+ * you entered into with NetSuite.
  *
  * Module Description
- * Map Reduce - automatically run a Saved Search, create CSV file, and send to the SFTP directory.
+ * SafetyCulture Pty - Map Reduce - automatically run a Saved Search, create CSV file, and send to the SFTP directory.
  *
  * Version          Date                    Author              Remarks
- * 1.00             22 March 2021             kduque            Initial version
+ * 1.00             22 March 2021           kduque              Initial version
+ * 1.01             19 April 2021           kduque              add Content Groups Column for CSV
  *
  * @NApiVersion 2.0
  * @NScriptType MapReduceScript
@@ -175,14 +183,17 @@ function(file, record, runtime, search, sftp, NSUtil) {
                 var approverLogin           = searchResult[i].getValue('custentity_nscs_supervisor_email');
                 var defaultChartOfAccount   = searchResult[i].getText('subsidiarynohierarchy');
                 var defaultAccCodeSeg_1     = searchResult[i].getValue('subsidiary');
-                var defaultAccCodeSeg_2     = searchResult[i].getText('department');
-                var defaultAccCodeSeg_5     = searchResult[i].getText('location');
+                var defaultAccCodeSeg_2     = searchResult[i].getValue('department');
+                var defaultAccCodeSeg_5     = searchResult[i].getValue('location');
                 var userRoleNames           = searchResult[i].getText('custentity_sc_coupa_user_type');
                 var defaultExpenseCurrency  = searchResult[i].getText('defaultexpensereportcurrency');
                 var defaultLocale           = searchResult[i].getText('custentity_nscs_coupa_def_locale');
                 var countryCode             = searchResult[i].getValue('custentity_nscs_country_code');
+                var contentGroups           = searchResult[i].getText('subsidiarynohierarchy');
+                var mentionName             = firstName + "." + lastName;
 
                 var currency                = searchResult[i].getText('currency');
+                var statusLC                = status.toLowerCase();
 
                 if(!NSUtil.isEmpty(defaultExpenseCurrency)){
                     defaultCurrency = defaultExpenseCurrency;
@@ -197,11 +208,10 @@ function(file, record, runtime, search, sftp, NSUtil) {
                     userRoleName = userRoleNames;
                 }
 
-
                 //log.debug('internalId', internalId);
                 log.debug('coupaId', coupaId);
                 log.debug('login', login);
-                log.debug('status', status);
+                log.debug('statusLC', statusLC);
                 log.debug('chkExpUser', chkExpUser);
                 log.debug('authMethod', authMethod);
                 log.debug('ssoIdentifier', ssoIdentifier);
@@ -220,6 +230,8 @@ function(file, record, runtime, search, sftp, NSUtil) {
                 log.debug('defaultCurrency', defaultCurrency);
                 log.debug('defaultLocale', defaultLocale);
                 log.debug('countryCode', countryCode);
+                log.debug('contentGroups', contentGroups);
+                log.debug('mentionName', mentionName);
 
                 var expApprovalWithCurrency = expApproval + " " + defaultCurrency;
 
@@ -227,7 +239,7 @@ function(file, record, runtime, search, sftp, NSUtil) {
                 //csvLines+= internalId + ',';
                 csvLines+= coupaId + ',';
                 csvLines+= login + ',';
-                csvLines+= status + ',';
+                csvLines+= statusLC + ',';
                 csvLines+= chkExpUser + ',';
                 csvLines+= authMethod + ',';
                 csvLines+= ssoIdentifier + ',';
@@ -245,7 +257,9 @@ function(file, record, runtime, search, sftp, NSUtil) {
                 csvLines+= userRoleName + ',';
                 csvLines+= defaultCurrency + ',';
                 csvLines+= defaultLocale + ',';
-                csvLines+= countryCode + '\r\n';
+                csvLines+= countryCode + ',';
+                csvLines+= contentGroups + ',';
+                csvLines+= mentionName + '\r\n';
 
                 //Save custom record Id
                 importIds.push(internalId);

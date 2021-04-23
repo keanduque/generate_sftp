@@ -190,10 +190,12 @@ function(file, record, runtime, search, sftp, NSUtil) {
                 var defaultLocale           = searchResult[i].getText('custentity_nscs_coupa_def_locale');
                 var countryCode             = searchResult[i].getValue('custentity_nscs_country_code');
                 var contentGroups           = searchResult[i].getText('subsidiarynohierarchy');
-                var mentionName             = firstName + "." + lastName;
+
+                var mentionName             = firstName + " " + lastName;
+                var mentionNameConcat       = mentionName.split(' ').join('.');
 
                 var currency                = searchResult[i].getText('currency');
-                var statusLC                = status.toLowerCase();
+                var statusLC                = status !== "" ? status.toLowerCase() : "active";
 
                 if(!NSUtil.isEmpty(defaultExpenseCurrency)){
                     defaultCurrency = defaultExpenseCurrency;
@@ -231,7 +233,7 @@ function(file, record, runtime, search, sftp, NSUtil) {
                 log.debug('defaultLocale', defaultLocale);
                 log.debug('countryCode', countryCode);
                 log.debug('contentGroups', contentGroups);
-                log.debug('mentionName', mentionName);
+                log.debug('mentionNameConcat', mentionNameConcat);
 
                 var expApprovalWithCurrency = expApproval + " " + defaultCurrency;
 
@@ -259,7 +261,7 @@ function(file, record, runtime, search, sftp, NSUtil) {
                 csvLines+= defaultLocale + ',';
                 csvLines+= countryCode + ',';
                 csvLines+= contentGroups + ',';
-                csvLines+= mentionName + '\r\n';
+                csvLines+= mentionNameConcat + '\r\n';
 
                 //Save custom record Id
                 importIds.push(internalId);
